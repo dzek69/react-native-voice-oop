@@ -33,6 +33,42 @@ const instanceManager = { // eslint-disable-line object-shorthand
     },
 };
 
+/**
+ * `start`, `end`, and `recognized` events data
+ *
+ * @typedef {Object} NoErrorData
+ * @param {false} error
+ */
+
+/**
+ * `volumeChanged` event data
+ *
+ * @typedef {Object} VolumeChangedData
+ * @param {number} value
+ */
+
+/**
+ * `partialResults` and `results` event data
+ *
+ * @typedef {Object} ResultsData
+ * @param {Array<string>} value
+ */
+
+/**
+ * `error` event data
+ *
+ * @typedef {Object} ErrorData
+ * @param {string} error
+ */
+
+/**
+ * @typedef {string} VoiceEvent
+ */
+
+/**
+ * List of available events
+ * @enum {VoiceEvent}
+ */
 const EVENTS = {
     start: "start",
     end: "end",
@@ -61,21 +97,61 @@ Voice.onSpeechError = (data) => redirectEvent(EVENTS.error, data);
 
 const FINAL_EVENTS = [EVENTS.error, EVENTS.results];
 
+const METHODS = [
+    "addEventListener", "removeEventListener", "start", "stop", "cancel", "_onVoiceEvent", "destroy",
+];
+
+/**
+ * @class VoiceToText
+ */
 class VoiceToText {
     constructor() {
-        this.destroy = this.destroy.bind(this);
         this._ee = new EventEmitter();
-        this._onVoiceEvent = this._onVoiceEvent.bind(this);
+        this._destroyed = false;
+
+        METHODS.forEach((fn) => {
+            const isPrivate = fn.substr(0, 1) === "_";
+            if (isPrivate) {
+                this[fn] = this[fn].bind(this);
+                return;
+            }
+            const cb = this[fn];
+            this[fn] = (...args) => {
+                this._checkDestroyed();
+                return cb.apply(this, args);
+            };
+        });
     }
 
+    /**
+     * Adds listener for specified event
+     *
+     * @param {VoiceEvent} eventName
+     * @param {function} listener
+     * @throws {Error} if called on destroyed instance
+     */
     addEventListener(eventName, listener) {
         this._ee.addListener(eventName, listener);
     }
 
+    /**
+     * Removed specified listener from specified event
+     *
+     * @param {VoiceEvent} eventName
+     * @param {function} listener
+     * @throws {Error} if called on destroyed instance
+     */
     removeEventListener(eventName, listener) {
         this._ee.removeListener(eventName, listener);
     }
 
+    /**
+     * Starts recognizing
+     *
+     * @param {string} locale
+     * @throws {Error} if another instance is already recognizing (same instance is allowed to restart recognizing)
+     * or when called on destroyed instance
+     */
     start(locale) {
         if (instanceManager.isCurrentOrNull(this)) {
             instanceManager.set(this, this._onVoiceEvent);
@@ -88,6 +164,12 @@ class VoiceToText {
         );
     }
 
+    /**
+     * Stops recognizing, it should cause `results` or `error` event to be send
+     *
+     * @throws {Error} if another instance started recognition (repeating stop when nothing is recognizing is allowed)
+     * or when called on destroyed instance
+     */
     stop() {
         if (instanceManager.isCurrentOrNull(this)) {
             Voice.stop();
@@ -99,6 +181,12 @@ class VoiceToText {
         );
     }
 
+    /**
+     * Cancels recognizing, no `results` or `error` events will be send.
+     *
+     * @throws {Error} if another instance started recognition (repeating cancel when nothing is recognizing is allowed)
+     * or when called on destroyed instance
+     */
     cancel() {
         if (instanceManager.isCurrentOrNull(this)) {
             Voice.cancel();
@@ -111,6 +199,13 @@ class VoiceToText {
         );
     }
 
+    /**
+     * Handler of global recognition event
+     *
+     * @param {VoiceEvent} name
+     * @param {NoErrorData|VolumeChangedData|ResultsData|ErrorData} data
+     * @private
+     */
     _onVoiceEvent(name, data) {
         this._ee.emit(name, data);
         if (FINAL_EVENTS.includes(name)) {
@@ -118,15 +213,46 @@ class VoiceToText {
         }
     }
 
+    /**
+     * Checks if instance was already destroyed
+     *
+     * @throws {Error} when called on destroyed instance
+     * @private
+     */
+    _checkDestroyed() {
+        if (this._destroyed) {
+            throw new Error("Instance destroyed. You cannot use methods on it anymore. Create another one.");
+        }
+    }
+
+    /**
+     * Destroys the instance, removes listener, cancels recognition
+     *
+     * @throws {Error} if called on destroyed instance
+     */
     destroy() {
+        this._destroyed = true;
         this._ee.removeAllListeners();
 
         if (instanceManager.isCurrent(this)) {
             instanceManager.clear();
+            Voice.cancel();
         }
     }
 }
+
+/**
+ * Checks if voice recognition is available on current system.
+ *
+ * @type {function}
+ */
 VoiceToText.isAvailable = Voice.isAvailable.bind(Voice);
+
+/**
+ * Checks if voice recognition is in progress (on any instance).
+ *
+ * @type {function}
+ */
 VoiceToText.isRecognizing = Voice.isRecognizing.bind(Voice);
 
 export default VoiceToText;

@@ -322,4 +322,32 @@ describe("VoiceToText", () => {
         voice.destroy();
         voiceAnother.destroy();
     });
+
+    it("cancels recognition on destroy if started listening", () => {
+        const voice = new VoiceToText();
+
+        Voice.cancel.calls.must.be.empty();
+        voice.destroy();
+        Voice.cancel.calls.must.be.empty();
+
+        const voiceAnother = new VoiceToText();
+        voiceAnother.start();
+        Voice.cancel.calls.must.be.empty();
+        voiceAnother.destroy();
+        Voice.cancel.calls.must.eql([
+            [],
+        ]);
+    });
+
+    it("throws when using methods on destroyed instance", () => {
+        const voice = new VoiceToText();
+        voice.destroy();
+
+        (() => voice.start()).must.throw(/Instance destroyed/);
+        (() => voice.stop()).must.throw(/Instance destroyed/);
+        (() => voice.cancel()).must.throw(/Instance destroyed/);
+        (() => voice.destroy()).must.throw(/Instance destroyed/);
+        (() => voice.addEventListener()).must.throw(/Instance destroyed/);
+        (() => voice.removeEventListener()).must.throw(/Instance destroyed/);
+    });
 });
