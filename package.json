@@ -1,6 +1,6 @@
 {
   "name": "react-native-voice-oop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/index.js",
   "repository": "https://github.com/dzek69/react-native-voice-oop.git",
   "author": "Jacek Nowacki @dzek69 <git-public@dzek.eu>",
@@ -24,14 +24,14 @@
     "fs-extra": "^7.0.0",
     "jsdoc": "^3.5.5",
     "mocha": "^5.2.0",
+    "mockery": "^2.1.0",
     "must": "^0.13.4"
   },
   "peerDependencies": {
     "@dzek69/react-native-voice": "^0.2.7"
   },
   "dependencies": {
-    "eventemitter3": "^3.1.0",
-    "mockery": "^2.1.0"
+    "eventemitter3": "^3.1.0"
   },
   "keywords": [
     "react",

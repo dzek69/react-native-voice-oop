@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [UNRELEASED]
 (nothing yet)
 
+## [1.0.1] - 2018-10-09
+### Fixed
+- moved `mockery` to dev deps
+
 ## [1.0.0] - 2018-10-09
 ### Added
 - first version
