@@ -32,5 +32,18 @@
   "dependencies": {
     "eventemitter3": "^3.1.0",
     "mockery": "^2.1.0"
-  }
+  },
+  "keywords": [
+    "react",
+    "reactnative",
+    "react-native",
+    "voice recognition",
+    "google speech to text",
+    "speech to text",
+    "android",
+    "ios",
+    "voice",
+    "speech",
+    "oop"
+  ]
 }

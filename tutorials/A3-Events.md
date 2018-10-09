@@ -1,32 +1,21 @@
-# How to use `react-native-voice-oop`
+# Explaination - missing information in `react-native-voice` docs
 
-## Install
+In my opinion `react-native-voice` fails to properly document available events, their meaning, triggering order that
+should be expected and data received with events. Read on for missing documentation on this.
 
-@TODO npm + peer, link
-
-## Important - missing information from `react-native-voice`
-
-IMO `react-native-voice` fails to properly document order of available events and data received. Read on for missing
-documentation on this.
-
-## Important - `react-native-voice` is broken now
-
-Currently `react-native-voice` causes release builds to fail with newest react-native version. A fixed fork is used
-instead - [@dzek69/react-native-voice](https://github.com/dzek69/react-native-voice).
-
-## Explanation of events
+## Events list and their meaning
 
 > Note: This was verified on Android device only. iOS experiments will be documented here later.
 
+> Note: Nothing here is guaranted to be true, everything here is a documented result of experiments.
+
 ### start
-`start` looks like* a indicator that voice is
+`start` looks like a indicator that voice is
 - started being recorded by device
 - started being sent over to recognition server
 
 Yes, this means `start` **is triggered twice** on successful voice recognition.
 `start` is triggered once on erroneous voice recognition, when there is no Internet connection.
-
-(*) - no guarantees on that
 
 ### end
 `end` looks like indicator that sound is no longer being sent to recognition server. Recognition still happens on
@@ -39,6 +28,12 @@ This means `end` **is NOT triggered** on erroneous voice recognition, when there
 ### volumeChanged
 `volumeChanged` is triggered many times, every few ms. It is all over between other events. It's usually triggered few
 times before `start`, it's triggered few times after `end` and even after `results`. Doesn't look useful.
+
+> Note: Currently all events after `results` or `error` events are muted and unlistenable due to actions this wrapper
+does to differentiate which instance should receive the event. Usually this means few `volumeChanged` events to be
+skipped. This is not very useful as after `results` or `error` events voice recognition is stopped anyway.
+
+> This may change in the future.
 
 ### partialResults
 `partialResults` is usually triggered few times during recognition.
@@ -111,6 +106,10 @@ whole sentence.
 
 ### recognized
 It seems to never be triggered, despite `react-native-voice` notes that it should be triggered on both iOS and Android.
+Anyway, accorting to original documentation it should contain always just this:
+```javascript
+{ error: false }
+```
 
 ### error
 ```javascript
@@ -152,10 +151,15 @@ anymore the server may still push the data for previously received voice data,
 1. `error` - usually there is few seconds gap between `end` and `error`.
 
 ### In case of `stop`ping recognition in the middle:
+> Stopping means just forcing recognizer to think that nothing is being said anymore.
+
 - If something was recognized before stopping - events will be the same as in success case.
 - If nothing was recognized before stopping - events will be the same as in error.
 
+
 ### In case of `cancel`ling recognition in the middle:
-- If something was recognized before stopping - events will be the same as in success case, but `end` and `results` will
+> Cancelling means ignoring everything - stopping in the middle with no ending events being sent.
+
+- If something was recognized before cancelling - events will be the same as in success case, but `end` and `results` will
 never be triggered.
-- If nothing was recognized before stopping - only `start` event will be triggered.
+- If nothing was recognized before cancelling - only `start` event will be triggered.

@@ -8,7 +8,7 @@ splitted into two events, triggering empty partial results, see documentation fo
 
 ## Install & Use
 
-See [documentation](https://dzek69.github.io/react-native-voice-oop/tutorial-How-to-use.html).
+See [documentation](https://dzek69.github.io/react-native-voice-oop/tutorial-A1-Installation.html).
 
 ## Features
 
