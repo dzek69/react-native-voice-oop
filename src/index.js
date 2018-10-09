@@ -25,6 +25,12 @@ const instanceManager = { // eslint-disable-line object-shorthand
     clear() {
         this.set(null);
     },
+    isCurrent(instance) {
+        return this._instance === instance;
+    },
+    isCurrentOrNull(instance) {
+        return !this._instance || this._instance === instance;
+    },
 };
 
 const EVENTS = {
@@ -71,8 +77,7 @@ class VoiceToText {
     }
 
     start(locale) {
-        const current = instanceManager.get();
-        if (!current || current.instance === this) {
+        if (instanceManager.isCurrentOrNull(this)) {
             instanceManager.set(this, this._onVoiceEvent);
             Voice.start(locale);
             return;
@@ -84,12 +89,26 @@ class VoiceToText {
     }
 
     stop() {
-        Voice.stop();
+        if (instanceManager.isCurrentOrNull(this)) {
+            Voice.stop();
+            return;
+        }
+
+        throw new Error(
+            "Another instance is recognizing right now.",
+        );
     }
 
     cancel() {
-        Voice.cancel();
-        instanceManager.clear();
+        if (instanceManager.isCurrentOrNull(this)) {
+            Voice.cancel();
+            instanceManager.clear();
+            return;
+        }
+
+        throw new Error(
+            "Another instance is recognizing right now.",
+        );
     }
 
     _onVoiceEvent(name, data) {
@@ -102,8 +121,7 @@ class VoiceToText {
     destroy() {
         this._ee.removeAllListeners();
 
-        const current = instanceManager.get();
-        if (current && current.instance === this) {
+        if (instanceManager.isCurrent(this)) {
             instanceManager.clear();
         }
     }

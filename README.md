@@ -19,6 +19,8 @@ See [documentation](https://dzek69.github.io/react-native-voice-oop/tutorial-How
 ## TODO
 
 - Method that will allow to queue `start` calls from multiple instances?
+- Pass after-results events (nothing useful) to last instance?
+- Allow force-stop/cancel from another instance?
 
 ## License
 

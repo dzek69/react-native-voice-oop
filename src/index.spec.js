@@ -65,7 +65,7 @@ describe("VoiceToText", () => {
         eventsReceived.must.eql([]);
     });
 
-    it("receives no events if another instance started", () => {
+    it("receives no events from another started instance", () => {
         const eventsReceived = [];
 
         const voice = new VoiceToText();
@@ -275,5 +275,51 @@ describe("VoiceToText", () => {
         ]);
 
         voice.destroy();
+    });
+
+    it("doesn't allow to stop from another instance", () => {
+        const voice = new VoiceToText();
+        const voiceAnother = new VoiceToText();
+
+        voice.start();
+        (() => {
+            voiceAnother.stop();
+        }).must.throw();
+
+        Voice.trigger("results");
+        voiceAnother.start();
+        (() => {
+            voice.stop();
+        }).must.throw();
+        Voice.trigger("results");
+        (() => {
+            voice.stop();
+        }).must.not.throw();
+
+        voice.destroy();
+        voiceAnother.destroy();
+    });
+
+    it("doesn't allow to cancel from another instance", () => {
+        const voice = new VoiceToText();
+        const voiceAnother = new VoiceToText();
+
+        voice.start();
+        (() => {
+            voiceAnother.stop();
+        }).must.throw();
+
+        Voice.trigger("results");
+        voiceAnother.start();
+        (() => {
+            voice.stop();
+        }).must.throw();
+        Voice.trigger("results");
+        (() => {
+            voice.stop();
+        }).must.not.throw();
+
+        voice.destroy();
+        voiceAnother.destroy();
     });
 });
