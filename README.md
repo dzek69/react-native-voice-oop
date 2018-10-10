@@ -1,4 +1,4 @@
-# react-native-tts-oop
+# react-native-voice-oop
 
 A tiny wrapper on react-native-voice which enables OOP style usage of this Speech To Text library. Prevents memory leaks
 and problems with usage from multiple components.
