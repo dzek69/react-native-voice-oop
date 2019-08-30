@@ -1,4 +1,1 @@
---require must/register
---require babel-core/register
---require babel-core/register
---require test/bootstrap.js
+--require ./test/bootstrap.js

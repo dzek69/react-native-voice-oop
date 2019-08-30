@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [UNRELEASED]
 (nothing yet)
 
+## [2.0.0] - 2019-08-30
+### Fixed
+- dev deps audit warnings
+### Changed
+- transpiled code in `dist` is now for browsers with >3% usage
+
 ## [1.0.1] - 2018-10-09
 ### Fixed
 - moved `mockery` to dev deps
